@@ -97,33 +97,45 @@ func main() {
 		log.Println("DETAILS ERROR:", err)
 	})
 
+	// Pass all of the HTML to the detailCollector
 	detailCollector.OnHTML(`html`, func(e *colly.HTMLElement) {
 
+		// Increment the number of articles we've encountered
 		processedCount++
 
+		// Declare an array of strings to fill up with keywords
 		var keywords []string
 
-		const REUTERS_DATE_FORMAT = "January _2, 2006 3:04 PM"
+		// Define the Reuters article date format using magic reference
+		const ReutersDateFormat = "January _2, 2006 3:04 PM"
 
+		// Split the date string on the '/' character
 		var dateSplit = strings.Split(e.ChildText("div.ArticleHeader_date"), "/")
 
+		// Encountered an error here before so if the date is weirdly formatted just skip it
+		// to avoid an out of index error
 		if len(dateSplit) < 2 {
 			return
 		}
 
+		// Remove leading and trailing spaces
 		var date = strings.TrimSpace(dateSplit[0])
 		var timestamp = strings.TrimSpace(dateSplit[1])
 		var cleaned = date + " " + timestamp
-		var publishedAt, _ = time.Parse(REUTERS_DATE_FORMAT, cleaned)
+		// Convert the date/time string into a time object
+		var publishedAt, _ = time.Parse(ReutersDateFormat, cleaned)
 
+		// Grab the title and body (that was easy!)
 		title := e.ChildText("h1.ArticleHeader_headline")
 		body := e.ChildText("div.StandardArticleBody_body")
 
+		// Get the keywords for this article
+		// This will only run once
 		e.ForEach("meta[name=keywords]", func(_ int, el *colly.HTMLElement) {
 			keywords = strings.Split(el.Attr("content"), ",")
 		})
 
-		// If the article isn't about an acquisition then just return from callback
+		// If the article isn't about an acquisition, merger, or takeover, then just return from callback
 		_, found := Find(keywords, "Mergers / Acquisitions / Takeovers")
 		if !found {
 			return
