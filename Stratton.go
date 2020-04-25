@@ -11,6 +11,10 @@ import (
 	"github.com/gocolly/colly/v2"
 )
 
+// Track the number of articles we parse
+var processedCount = 0
+
+// Is there anyway to make this faster?
 // Helper function to check if a keyword is part of the article keywords
 func Find(slice []string, val string) (int, bool) {
 	for i, item := range slice {
@@ -39,19 +43,19 @@ func main() {
 
 		// Cache responses to prevent multiple download of pages
 		// even if the collector is restarted
-		colly.CacheDir("./reuters_cache"),
+		// colly.CacheDir("./reuters_cache"),
 
 		colly.Async(true),
 
 		// Set a max depth to prevent too much scraping right now
-		//colly.MaxDepth(10),
+		colly.MaxDepth(25),
 	)
 
 	// Don't revisit the same URL twice
 	c.AllowURLRevisit = false
 
 	// Parallelism
-	c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 100})
+	c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 300})
 
 	// Create another collector to scrape article detail page
 	detailCollector := c.Clone()
@@ -81,7 +85,7 @@ func main() {
 
 	// Before making a request print "Visiting {URL}"
 	c.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting List Page: ", r.URL.String())
+		//log.Println("Visiting List Page: ", r.URL.String())
 	})
 
 	// Report error back to the console
@@ -94,6 +98,8 @@ func main() {
 	})
 
 	detailCollector.OnHTML(`html`, func(e *colly.HTMLElement) {
+
+		processedCount++
 
 		var keywords []string
 
@@ -110,8 +116,6 @@ func main() {
 		var cleaned = date + " " + timestamp
 		var publishedAt, _ = time.Parse(REUTERS_DATE_FORMAT, cleaned)
 
-		fmt.Println(cleaned)
-		fmt.Println(publishedAt)
 		title := e.ChildText("h1.ArticleHeader_headline")
 		body := e.ChildText("div.StandardArticleBody_body")
 
@@ -138,11 +142,22 @@ func main() {
 		articles = append(articles, a)
 	})
 
+	// Start the timer
+	start := time.Now()
+
 	// Start scraping on the business news section
 	c.Visit("https://www.reuters.com/news/archive/businessNews")
 
 	c.Wait()
 	detailCollector.Wait()
+
+	elapsed := time.Since(start)
+	fmt.Println()
+	fmt.Println("If anyone over here thinks I’m superficial or materialistic, go get a job at McDonald’s because that’s where you belong.")
+	fmt.Println()
+	log.Printf("%d Articles Processed", processedCount)
+	log.Printf("Job took %s", elapsed)
+	fmt.Println()
 
 	// WRITE TO A FILE
 	file, _ := json.MarshalIndent(articles, "", "  ")
@@ -153,3 +168,5 @@ func main() {
 	//enc.SetIndent("", "  ")
 	//enc.Encode(articles)
 }
+
+// Anna Kalik approves this project!
