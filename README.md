@@ -27,6 +27,9 @@ I plan for Stratton to detect news of mergers, acquisitions, and other market ev
 
 Another use for Stratton is to generate data to train a machine learning model on. 
 
+## Go vs Python (coming soon)
+<img src="https://lh3.googleusercontent.com/jYq61Hbfgd5H0En4bizTxZzvd30Y9hQu5NTZgHOgx2AdHT55qG0VRhwJLB6HgdaIY2h8E977O3s0qvLCkLTm7KtN-l27kt9Zr-vWpkEaeC4qKHgu_AMeqtUhg5W0XUNF5M02ExmlJkc=w2400" width="1200" />
+
 ## Interesting Work
 
 ### Papers
