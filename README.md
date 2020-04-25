@@ -21,6 +21,8 @@ The world of investing can be a jungle. Bulls, bears, danger at every turn. That
 
 ## Purpose
 
+**“If anyone over here thinks I’m superficial or materialistic, go get a job at McDonald’s because that’s where you belong.”**
+
 I plan for Stratton to detect news of mergers, acquisitions, and other market events in almost real-time and then generate trading signals. 
 
 Another use for Stratton is to generate data to train a machine learning model on. 
