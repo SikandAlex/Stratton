@@ -41,12 +41,17 @@ func main() {
 		// even if the collector is restarted
 		colly.CacheDir("./reuters_cache"),
 
+		colly.Async(true),
+
 		// Set a max depth to prevent too much scraping right now
-		//colly.MaxDepth(2),
+		//colly.MaxDepth(10),
 	)
 
 	// Don't revisit the same URL twice
 	c.AllowURLRevisit = false
+
+	// Parallelism
+	c.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 100})
 
 	// Create another collector to scrape article detail page
 	detailCollector := c.Clone()
@@ -95,6 +100,11 @@ func main() {
 		const REUTERS_DATE_FORMAT = "January _2, 2006 3:04 PM"
 
 		var dateSplit = strings.Split(e.ChildText("div.ArticleHeader_date"), "/")
+
+		if len(dateSplit) < 2 {
+			return
+		}
+
 		var date = strings.TrimSpace(dateSplit[0])
 		var timestamp = strings.TrimSpace(dateSplit[1])
 		var cleaned = date + " " + timestamp
@@ -130,6 +140,9 @@ func main() {
 
 	// Start scraping on the business news section
 	c.Visit("https://www.reuters.com/news/archive/businessNews")
+
+	c.Wait()
+	detailCollector.Wait()
 
 	// WRITE TO A FILE
 	file, _ := json.MarshalIndent(articles, "", "  ")
