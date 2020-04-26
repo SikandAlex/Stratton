@@ -11,6 +11,7 @@
   </a>
 </p>
 
+# Stratton
 ## A distributed scraper for financial news, written in Go
 
 The world of investing can be a jungle. Bulls, bears, danger at every turn. That’s why we at Stratton pride our self on being the best. Trained professionals to guide you through the financial wilderness. Stratton. Stability, integrity, pride.
